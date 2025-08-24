@@ -12,11 +12,13 @@ public class StepDefATM {
     ATM atm;
     Bank bank;
     boolean validLogin;
+    private Exception exception;
 
     @Before
     public void init() {
         bank = new Bank("KU Bank");
         atm = new ATM(bank);
+        exception = null;
     }
 
     @Given("a customer with id {int} and pin {int} exists")
@@ -70,4 +72,19 @@ public class StepDefATM {
                      bank.getCustomer(id).getAccount().getBalance());
     }
 
+    @When("I deposit {int}")
+    public void i_deposit(int amount) {
+        double currentBalance = atm.getBalance();
+        try {
+            atm.deposit(amount);
+            assertEquals(currentBalance + amount, atm.getBalance());
+        } catch (Exception e) {
+            exception = e;
+        }
+    }
+
+    @Then("an error should be {string}")
+    public void an_error_should_be(String errorMessage) {
+        assertEquals(errorMessage, exception.getMessage());
+    }
 }
